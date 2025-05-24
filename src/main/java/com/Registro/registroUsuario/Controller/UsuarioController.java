@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UsuarioController {
 
-  
     private final UsuarioService usuarioService;
 
     @GetMapping("/test")
@@ -22,6 +21,7 @@ public class UsuarioController {
     public String ping() {
         return "pong";
     }
+
     @PostMapping("/crear")
     public UsuarioRegistroDTO crear(@RequestBody UsuarioCreateDTO dto) {
         return usuarioService.crearUsuario(dto);
