@@ -20,7 +20,7 @@ public class WebSecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/usuarios/login", "/usuarios/crear").permitAll()
+                .requestMatchers("/Usuarios/login", "/Usuarios/crear").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
