@@ -13,6 +13,15 @@ public class UsuarioController {
   
     private final UsuarioService usuarioService;
 
+    @GetMapping("/test")
+    public String test() {
+        return "OK";
+    }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "pong";
+    }
     @PostMapping("/crear")
     public UsuarioRegistroDTO crear(@RequestBody UsuarioCreateDTO dto) {
         return usuarioService.crearUsuario(dto);
