@@ -1,63 +1,91 @@
 package com.Registro.registroUsuario.Service;
 
-import java.time.LocalDate;
+import com.Registro.registroUsuario.Models.*;
+import com.Registro.registroUsuario.Repository.*;
+import com.Registro.registroUsuario.DTO.*;
+import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.Registro.registroUsuario.Models.RolModel;
-import com.Registro.registroUsuario.Models.UsuarioModel;
-import com.Registro.registroUsuario.Repository.UsuarioRespo;
-import com.Registro.registroUsuario.Repository.UsuarioRolRespo;
+import org.springframework.web.server.ResponseStatusException;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioService {
 
-    @Autowired
-    private UsuarioRespo usuarioRepository;
+    private final UsuarioRespo usuarioRepository;
+    private final UsuarioRolRespo rolRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UsuarioRolRespo rolRepository;
+    public UsuarioRegistroDTO crearUsuario(UsuarioCreateDTO dto) {
+        if (!dto.esValido()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datos inválidos");
+        }
+        RolModel rol = rolRepository.findById(dto.getRolId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
 
-    public UsuarioModel registrar(
-            String nombre,
-            String apellidoPaterno,
-            String apellidoMaterno,
-            String rut,
-            String email,
-            String contrasenia,
-            String confirmarContrasenia,
-            Integer rolId) {
-
-        if (!contrasenia.equals(confirmarContrasenia)) {
-            System.out.println("Las contraseñas no coinciden");
-            return null;
-        }
-        if (usuarioRepository.existsByEmail(email)) {
-            System.out.println("Ya existe un usuario con este correo");
-            return null;
-        }
-
-        if (usuarioRepository.existsByRut(rut)) {
-            System.out.println("Ya existe un usuario con este RUT");
-            return null;
-        }
-        RolModel rol = rolRepository.findById(rolId).orElse(null);
-        if (rol == null) {
-            System.out.println("Rol no encontrado");
-            return null;
-        }
         UsuarioModel usuario = new UsuarioModel();
-        usuario.setNombre(nombre);
-        usuario.setApellidoPaterno(apellidoPaterno);
-        usuario.setApellidoMaterno(apellidoMaterno);
-        usuario.setRut(rut);
-        usuario.setEmail(email);
-        usuario.setContrasenia(contrasenia);
+        usuario.setNombre(dto.getNombre());
+        usuario.setApellidoPaterno(dto.getApellidoPaterno());
+        usuario.setApellidoMaterno(dto.getApellidoMaterno());
+        usuario.setRut(dto.getRut());
+        usuario.setEmail(dto.getEmail());
+        usuario.setContrasenia(passwordEncoder.encode(dto.getContrasenia()));
         usuario.setFechaRegistro(LocalDate.now());
         usuario.setRol(rol);
+        usuario.setActivo(true);
 
-        return usuarioRepository.save(usuario);
+        UsuarioModel guardado = usuarioRepository.save(usuario);
+        return mapToDTO(guardado);
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        Optional<UsuarioModel> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
+        if (usuarioOpt.isEmpty() || !passwordEncoder.matches(request.getContrasenia(), usuarioOpt.get().getContrasenia())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
+        }
+        return new LoginResponse("TOKEN_DE_EJEMPLO", "Login exitoso");
+    }
+
+    public UsuarioRegistroDTO obtenerUsuario(int id) {
+        UsuarioModel u = usuarioRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        return mapToDTO(u);
+    }
+
+    public UsuarioRegistroDTO actualizarUsuario(int id, UsuarioCreateDTO dto) {
+        UsuarioModel existente = usuarioRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        existente.setNombre(dto.getNombre());
+        existente.setApellidoPaterno(dto.getApellidoPaterno());
+        existente.setApellidoMaterno(dto.getApellidoMaterno());
+        existente.setContrasenia(passwordEncoder.encode(dto.getContrasenia()));
+        return mapToDTO(usuarioRepository.save(existente));
+    }
+
+    public void eliminarUsuario(int id) {
+        UsuarioModel usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
+    }
+
+    private UsuarioRegistroDTO mapToDTO(UsuarioModel usuario) {
+        return new UsuarioRegistroDTO(
+            usuario.getId(),
+            usuario.getNombre(),
+            usuario.getApellidoPaterno(),
+            usuario.getApellidoMaterno(),
+            usuario.getRut(),
+            usuario.getEmail(),
+            usuario.getFechaRegistro(),
+            usuario.getRol().getNombre(),
+            usuario.getRol().getPermisos().stream().map(PermisoModel::getNombre).collect(Collectors.toSet())
+        );
     }
 }
 

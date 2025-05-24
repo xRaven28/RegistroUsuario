@@ -1,9 +1,9 @@
 package com.Registro.registroUsuario.Models;
 
 import java.time.LocalDate;
-
 import jakarta.persistence.*;
 import lombok.*;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,19 +35,10 @@ public class UsuarioModel {
     @Column(nullable = false)
     private LocalDate fechaRegistro;
 
+    @Column(nullable = false)
+    private boolean activo = true;
+
     @ManyToOne
     @JoinColumn(name = "rol_id", nullable = false)
     private RolModel rol;
-    public boolean validar() {
-        return nombre != null && !nombre.trim().isEmpty()
-            && apellidoPaterno != null && !apellidoPaterno.trim().isEmpty()
-            && apellidoMaterno != null && !apellidoMaterno.trim().isEmpty()
-            && rut != null && !rut.trim().isEmpty()
-            && email != null && !email.trim().isEmpty()
-            && contrasenia != null && !contrasenia.trim().isEmpty();
-    }
-
-    public boolean verificarContraseña(String password) {
-        return this.contrasenia.equals(password);
-    }
 }

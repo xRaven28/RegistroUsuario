@@ -1,18 +1,20 @@
 package com.Registro.registroUsuario.DTO;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
+import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsuarioRegistroDTO {
+     private int id;
     private String nombre;
     private String apellidoPaterno;
-    private String apellidoMaterno; 
+    private String apellidoMaterno;
     private String rut;
     private String email;
-    private String contrasenia;
-    private String confirmarContrasenia;
-    private Integer rolId;
+    private LocalDate fechaRegistro;
+    private String rol;
+    private Set<String> permisos;
 }

@@ -1,47 +1,40 @@
 package com.Registro.registroUsuario.Controller;
 
-import com.Registro.registroUsuario.DTO.UsuarioRegistroDTO;
-import com.Registro.registroUsuario.Models.UsuarioModel;
+import com.Registro.registroUsuario.DTO.*;
 import com.Registro.registroUsuario.Service.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/Usuarios")
+@RequiredArgsConstructor
 public class UsuarioController {
 
-    @Autowired
-    private UsuarioService usuarioService;
-    @PostMapping("/registro")
-    public ResponseEntity<?> registrarUsuario(@RequestBody UsuarioRegistroDTO dto) {
-        if (!dto.getContrasenia().equals(dto.getConfirmarContrasenia())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Las contraseñas no coinciden");
-        }
+  
+    private final UsuarioService usuarioService;
 
-        UsuarioModel usuario = usuarioService.registrar(
-            dto.getNombre(),
-            dto.getApellidoPaterno(),
-            dto.getApellidoMaterno(),
-            dto.getRut(),
-            dto.getEmail(),
-            dto.getContrasenia(),
-            dto.getConfirmarContrasenia(),
-            dto.getRolId()
-        );
-
-        if (usuario == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Error en los datos de registro");
-        }
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
+    @PostMapping("/crear")
+    public UsuarioRegistroDTO crear(@RequestBody UsuarioCreateDTO dto) {
+        return usuarioService.crearUsuario(dto);
     }
-    @GetMapping("/ping")
-    public String ping() {
-        return "Servidor arriba";
+
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody LoginRequest request) {
+        return usuarioService.login(request);
+    }
+
+    @GetMapping("/{id}")
+    public UsuarioRegistroDTO obtener(@PathVariable int id) {
+        return usuarioService.obtenerUsuario(id);
+    }
+
+    @PutMapping("/{id}")
+    public UsuarioRegistroDTO actualizar(@PathVariable int id, @RequestBody UsuarioCreateDTO dto) {
+        return usuarioService.actualizarUsuario(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void eliminar(@PathVariable int id) {
+        usuarioService.eliminarUsuario(id);
     }
 }
