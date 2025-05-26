@@ -26,7 +26,7 @@ public class UsuarioService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datos inválidos");
         }
         RolModel rol = rolRepository.findById(dto.getRolId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
 
         UsuarioModel usuario = new UsuarioModel();
         usuario.setNombre(dto.getNombre());
@@ -45,21 +45,22 @@ public class UsuarioService {
 
     public LoginResponse login(LoginRequest request) {
         Optional<UsuarioModel> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
-        if (usuarioOpt.isEmpty() || !passwordEncoder.matches(request.getContrasenia(), usuarioOpt.get().getContrasenia())) {
+        if (usuarioOpt.isEmpty()
+                || !passwordEncoder.matches(request.getContrasenia(), usuarioOpt.get().getContrasenia())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
         }
-        return new LoginResponse("TOKEN_DE_EJEMPLO", "Login exitoso");
+        return new LoginResponse("Usuario ingresado", "Inicio exitoso");
     }
 
     public UsuarioRegistroDTO obtenerUsuario(int id) {
         UsuarioModel u = usuarioRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         return mapToDTO(u);
     }
 
     public UsuarioRegistroDTO actualizarUsuario(int id, UsuarioCreateDTO dto) {
         UsuarioModel existente = usuarioRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         existente.setNombre(dto.getNombre());
         existente.setApellidoPaterno(dto.getApellidoPaterno());
         existente.setApellidoMaterno(dto.getApellidoMaterno());
@@ -69,23 +70,21 @@ public class UsuarioService {
 
     public void eliminarUsuario(int id) {
         UsuarioModel usuario = usuarioRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
     }
 
     private UsuarioRegistroDTO mapToDTO(UsuarioModel usuario) {
         return new UsuarioRegistroDTO(
-            usuario.getId(),
-            usuario.getNombre(),
-            usuario.getApellidoPaterno(),
-            usuario.getApellidoMaterno(),
-            usuario.getRut(),
-            usuario.getEmail(),
-            usuario.getFechaRegistro(),
-            usuario.getRol().getNombre(),
-            usuario.getRol().getPermisos().stream().map(PermisoModel::getNombre).collect(Collectors.toSet())
-        );
+                usuario.getId(),
+                usuario.getNombre(),
+                usuario.getApellidoPaterno(),
+                usuario.getApellidoMaterno(),
+                usuario.getRut(),
+                usuario.getEmail(),
+                usuario.getFechaRegistro(),
+                usuario.getRol().getNombre(),
+                usuario.getRol().getPermisos().stream().map(PermisoModel::getNombre).collect(Collectors.toSet()));
     }
 }
-
