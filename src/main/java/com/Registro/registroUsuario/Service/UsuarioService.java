@@ -52,13 +52,13 @@ public class UsuarioService {
         return new LoginResponse("Usuario ingresado", "Inicio exitoso");
     }
 
-    public UsuarioRegistroDTO obtenerUsuario(int id) {
+    public UsuarioRegistroDTO obtenerUsuario(long id) {
         UsuarioModel u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         return mapToDTO(u);
     }
 
-    public UsuarioRegistroDTO actualizarUsuario(int id, UsuarioCreateDTO dto) {
+    public UsuarioRegistroDTO actualizarUsuario(long id, UsuarioCreateDTO dto) {
         UsuarioModel existente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         existente.setNombre(dto.getNombre());
@@ -68,7 +68,7 @@ public class UsuarioService {
         return mapToDTO(usuarioRepository.save(existente));
     }
 
-    public void eliminarUsuario(int id) {
+    public void eliminarUsuario(long id) {
         UsuarioModel usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         usuario.setActivo(false);

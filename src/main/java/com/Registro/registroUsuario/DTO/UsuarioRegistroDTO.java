@@ -8,7 +8,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsuarioRegistroDTO {
-     private int id;
+    private long id;
     private String nombre;
     private String apellidoPaterno;
     private String apellidoMaterno;

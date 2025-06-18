@@ -15,11 +15,11 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (rolRepository.count() == 0) {
-            rolRepository.save(new RolModel(0, "Estudiante", null));
-            rolRepository.save(new RolModel(0, "Docente", null));
-            rolRepository.save(new RolModel(0, "Administrador", null));
-            rolRepository.save(new RolModel(0, "Gerente de curso", null));
-            rolRepository.save(new RolModel(0, "Servicio técnico", null));
+            rolRepository.save(new RolModel(null, "Estudiante", null));
+            rolRepository.save(new RolModel(null, "Docente", null));
+            rolRepository.save(new RolModel(null, "Administrador", null));
+            rolRepository.save(new RolModel(null, "Gerente de curso", null));
+            rolRepository.save(new RolModel(null, "Servicio técnico", null));
             System.out.println("Roles iniciales creados automáticamente.");
         }
     }

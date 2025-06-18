@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.Registro.registroUsuario.Models.UsuarioModel;
 import java.util.Optional;
 
-public interface UsuarioRespo extends JpaRepository<UsuarioModel, Integer> {
+public interface UsuarioRespo extends JpaRepository<UsuarioModel, Long> {
      Optional<UsuarioModel> findByEmail(String email);
 }

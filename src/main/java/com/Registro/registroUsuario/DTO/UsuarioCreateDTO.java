@@ -6,13 +6,13 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsuarioCreateDTO {
- private String nombre;
+    private String nombre;
     private String apellidoPaterno;
     private String apellidoMaterno;
     private String rut;
     private String email;
     private String contrasenia;
-    private int rolId;
+    private long rolId;
 
     public boolean esValido() {
         return nombre != null && !nombre.trim().isEmpty()

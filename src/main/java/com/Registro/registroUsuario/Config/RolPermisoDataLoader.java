@@ -23,12 +23,12 @@ public class RolPermisoDataLoader implements CommandLineRunner {
 
         if (permisoRepository.count() == 0) {
             permisoRepository.saveAll(Arrays.asList(
-                new PermisoModel(null, "USUARIO CREAR"),
-                new PermisoModel(null, "USUARIO VER"),
-                new PermisoModel(null, "USUARIO EDITAR"),
-                new PermisoModel(null, "USUARIO ELIMINAR"),
-                new PermisoModel(null, "ROL ASIGNAR"),
-                new PermisoModel(null, "ROL VER")
+                new PermisoModel(0, "USUARIO CREAR"),
+                new PermisoModel(0, "USUARIO VER"),
+                new PermisoModel(0, "USUARIO EDITAR"),
+                new PermisoModel(0, "USUARIO ELIMINAR"),
+                new PermisoModel(0, "ROL ASIGNAR"),
+                new PermisoModel(0, "ROL VER")
             ));
             System.out.println("Permisos iniciales creados.");
         }
