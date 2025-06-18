@@ -30,7 +30,7 @@ public class RegistroServiceTest {
     }
 
     @Test
-    void testCrearUsuario_exitoso() {
+    void testUsuario() {
         UsuarioCreateDTO usuariodto = new UsuarioCreateDTO("Juan", "Bernal", "Alarcon", "11222333-4", "juan@gmail.com",
                 "123", 1);
         RolModel usuariorol = new RolModel(null, "ADMIN", new HashSet<>());
@@ -48,7 +48,7 @@ public class RegistroServiceTest {
     }
 
     @Test
-    void testObtenerUsuario_noEncontrado() {
+    void testObtenerUsuario() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> usuarioService.obtenerUsuario(1L))
                 .isInstanceOf(ResponseStatusException.class)
@@ -56,7 +56,7 @@ public class RegistroServiceTest {
     }
 
     @Test
-    void testEliminarUsuario_exitoso() {
+    void testEliminarUsuario() {
         RolModel rol = new RolModel(null, "ADMIN", new HashSet<>());
         UsuarioModel usuario = new UsuarioModel(1L, "Juan", "Bernal", "Alarcon", "11222333-4",
                 "juan@gmail.com", "123", null, true, rol);
