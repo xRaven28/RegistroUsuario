@@ -56,7 +56,7 @@ public class UsuarioController {
         return agregarLinks(actualizado);
     }
 
-    @Operation(summary = "Eliminar (desactivar) usuario")
+    @Operation(summary = "Eliminar usuario")
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable long id) {
         usuarioService.eliminarUsuario(id);
