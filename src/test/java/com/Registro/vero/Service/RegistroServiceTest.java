@@ -8,6 +8,8 @@ import com.Registro.registroUsuario.DTO.*;
 import com.Registro.registroUsuario.Models.*;
 import com.Registro.registroUsuario.Repository.*;
 import com.Registro.registroUsuario.Service.UsuarioService;
+
+import java.time.LocalDate;
 import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -54,7 +56,29 @@ public class RegistroServiceTest {
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Usuario no encontrado");
     }
-
+    @Test
+    void actualizarUsuario() {
+       UsuarioCreateDTO dto = new UsuarioCreateDTO(
+        "Ana", "Actualizado", "Gomez", "123", "ana@gmail.com", "clave", 1L
+       );
+       Set<PermisoModel> permisos = Set.of(new PermisoModel(1, "USUARIO VER"));
+       RolModel rol = new RolModel(1L, "ADMIN", permisos);
+       UsuarioModel existente = new UsuarioModel(
+        1L, "Ana", "Lopez", "Gomez", "123", "ana@gmail.com", "anterior",
+        LocalDate.now(), true, rol
+       );
+       UsuarioModel actualizado = new UsuarioModel(
+        1L, "Ana", "Actualizado", "Gomez", "123", "ana@gmail.com", "hashedNuevaClave",
+        LocalDate.now(), true, rol
+        );
+       when(usuarioRepository.findById(1L)).thenReturn(Optional.of(existente));
+       when(passwordEncoder.encode("clave")).thenReturn("hashedNuevaClave");
+       when(usuarioRepository.save(any())).thenReturn(actualizado);
+       UsuarioRegistroDTO result = usuarioService.actualizarUsuario(1L, dto);
+       assertThat(result.getApellidoPaterno()).isEqualTo("Actualizado");
+       assertThat(result.getPermisos()).contains("USUARIO VER");
+       verify(usuarioRepository).save(any(UsuarioModel.class));
+    }
     @Test
     void testEliminarUsuario() {
         RolModel rol = new RolModel(null, "ADMIN", new HashSet<>());
