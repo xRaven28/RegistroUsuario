@@ -30,6 +30,32 @@ public class RegistroServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
+    @Test
+    void loginExitoso() {
+        LoginRequest request = new LoginRequest("ana@gmail.com", "clave");
+        RolModel rol = new RolModel(1L, "ADMIN", Set.of(new PermisoModel(1, "USUARIO VER")));
+        UsuarioModel usuario = new UsuarioModel(
+        1L, "Ana", "Lopez", "Gomez", "12345678-9", "ana@gmail.com", "claveEncriptada",
+        LocalDate.now(), true, rol
+    );
+        when(usuarioRepository.findByEmail("ana@gmail.com")).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("clave", "claveEncriptada")).thenReturn(true);
+        LoginResponse response = usuarioService.login(request);
+        assertThat(response.getMensaje()).isEqualTo("Inicio exitoso"); 
+        assertThat(response.getToken()).isEqualTo("Usuario ingresado");
+    }
+    @Test
+    void loginFallaCredenciales() {
+        LoginRequest request = new LoginRequest("ana@gmail.com", "clave");
+        UsuarioModel usuario = new UsuarioModel();
+        usuario.setEmail("ana@gmail.com");
+        usuario.setContrasenia("otraClave");
+        when(usuarioRepository.findByEmail("ana@gmail.com")).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("clave", "otraClave")).thenReturn(false);
+        assertThatThrownBy(() -> usuarioService.login(request))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Credenciales inválidas");
+}
 
     @Test
     void testUsuario() {
