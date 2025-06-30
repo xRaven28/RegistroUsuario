@@ -44,13 +44,20 @@ public class UsuarioService {
     }
 
     public LoginResponse login(LoginRequest request) {
+        if (request == null || request.getEmail() == null || request.getContrasenia() == null
+            || request.getEmail().isBlank() || request.getContrasenia().isBlank()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email y contraseña son obligatorios");
+        }
+
         Optional<UsuarioModel> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
         if (usuarioOpt.isEmpty()
-                || !passwordEncoder.matches(request.getContrasenia(), usuarioOpt.get().getContrasenia())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
+            || !passwordEncoder.matches(request.getContrasenia(), usuarioOpt.get().getContrasenia())) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
         }
+
         return new LoginResponse("Usuario ingresado", "Inicio exitoso");
     }
+    
 
     public UsuarioRegistroDTO obtenerUsuario(long id) {
         UsuarioModel u = usuarioRepository.findById(id)

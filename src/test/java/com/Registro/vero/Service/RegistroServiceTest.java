@@ -2,6 +2,7 @@ package com.Registro.vero.Service;
 
 import org.junit.jupiter.api.*;
 import org.mockito.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 import com.Registro.registroUsuario.DTO.*;
@@ -44,6 +45,7 @@ public class RegistroServiceTest {
         assertThat(response.getMensaje()).isEqualTo("Inicio exitoso"); 
         assertThat(response.getToken()).isEqualTo("Usuario ingresado");
     }
+    
     @Test
     void loginFallaCredenciales() {
         LoginRequest request = new LoginRequest("ana@gmail.com", "clave");
@@ -55,12 +57,55 @@ public class RegistroServiceTest {
         assertThatThrownBy(() -> usuarioService.login(request))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Credenciales inválidas");
-}
+    }
+    
+    @Test
+    void loginUsuarioNoExiste() {
+    LoginRequest request = new LoginRequest("inexistente@gmail.com", "clave");
 
+    when(usuarioRepository.findByEmail("inexistente@gmail.com"))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> usuarioService.login(request))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("Credenciales inválidas")
+        .satisfies(ex -> {
+            ResponseStatusException e = (ResponseStatusException) ex;
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        });
+    }
+
+    @Test
+    void loginRequestInvalido() {
+    assertThatThrownBy(() -> usuarioService.login(null))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("Email y contraseña son obligatorios");
+
+    LoginRequest sinEmail = new LoginRequest(null, "clave");
+    assertThatThrownBy(() -> usuarioService.login(sinEmail))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("Email y contraseña son obligatorios");
+
+    LoginRequest sinPass = new LoginRequest("ana@gmail.com", null);
+    assertThatThrownBy(() -> usuarioService.login(sinPass))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("Email y contraseña son obligatorios");
+
+    LoginRequest emailVacio = new LoginRequest("   ", "clave");
+    assertThatThrownBy(() -> usuarioService.login(emailVacio))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("Email y contraseña son obligatorios");
+
+    LoginRequest passVacia = new LoginRequest("ana@gmail.com", "  ");
+    assertThatThrownBy(() -> usuarioService.login(passVacia))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("Email y contraseña son obligatorios");
+    }
     @Test
     void testUsuario() {
         UsuarioCreateDTO usuariodto = new UsuarioCreateDTO("Juan", "Bernal", "Alarcon", "11222333-4", "juan@gmail.com",
                 "123", 1);
+
         RolModel usuariorol = new RolModel(null, "ADMIN", new HashSet<>());
         when(rolRepository.findById(1L)).thenReturn(Optional.of(usuariorol));
         when(passwordEncoder.encode("123")).thenReturn("123");
@@ -76,12 +121,39 @@ public class RegistroServiceTest {
     }
 
     @Test
+    void crearUsuario_DTO_Invalido() {
+        UsuarioCreateDTO dtoInvalido = new UsuarioCreateDTO();
+
+        assertThatThrownBy(() -> usuarioService.crearUsuario(dtoInvalido))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Datos inválidos");
+
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
     void testObtenerUsuario() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> usuarioService.obtenerUsuario(1L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Usuario no encontrado");
     }
+
+    @Test
+    void obtenerUsuario_Exitoso() {
+        RolModel rol = new RolModel(1L, "ADMIN", new HashSet<>());
+        UsuarioModel usuario = new UsuarioModel(
+            1L, "Juan", "Bernal", "Alarcon", "11222333-4", "juan@gmail.com",
+            "hashed", LocalDate.now(), true, rol
+        );
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+        UsuarioRegistroDTO dto = usuarioService.obtenerUsuario(1L);
+
+        assertThat(dto.getId()).isEqualTo(1L);
+        assertThat(dto.getNombre()).isEqualTo("Juan");
+    }
+
     @Test
     void actualizarUsuario() {
        UsuarioCreateDTO dto = new UsuarioCreateDTO(
@@ -100,14 +172,27 @@ public class RegistroServiceTest {
        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(existente));
        when(passwordEncoder.encode("clave")).thenReturn("hashedNuevaClave");
        when(usuarioRepository.save(any())).thenReturn(actualizado);
+
        UsuarioRegistroDTO result = usuarioService.actualizarUsuario(1L, dto);
+
        assertThat(result.getApellidoPaterno()).isEqualTo("Actualizado");
        assertThat(result.getPermisos()).contains("USUARIO VER");
        verify(usuarioRepository).save(any(UsuarioModel.class));
     }
+
+    @Test
+    void actualizarUsuario_NoExiste() {
+        UsuarioCreateDTO dto = new UsuarioCreateDTO("Ana", "Actualizado", "Gomez", "123", "ana@gmail.com", "clave", 1L);
+        when(usuarioRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> usuarioService.actualizarUsuario(999L, dto))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Usuario no encontrado");
+    }
+
     @Test
     void testEliminarUsuario() {
-        RolModel rol = new RolModel(null, "ADMIN", new HashSet<>());
+        RolModel rol = new RolModel(1L, "ADMIN", new HashSet<>());
         UsuarioModel usuario = new UsuarioModel(1L, "Juan", "Bernal", "Alarcon", "11222333-4",
                 "juan@gmail.com", "123", null, true, rol);
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
