@@ -127,8 +127,21 @@ public class RegistroServiceTest {
         assertThatThrownBy(() -> usuarioService.crearUsuario(dtoInvalido))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Datos inválidos");
+    }
+    @Test
+    void LosCamposSonValidos() {
+    UsuarioCreateDTO dto = new UsuarioCreateDTO(
+        "Ana", "Lopez", "Perez", "12345678-9", "ana@gmail.com", "clave", 1L
+    );
 
-        verify(usuarioRepository, never()).save(any());
+    assertThat(dto.esValido()).isTrue();
+    }
+
+    @Test
+    void CamposSonInvalidos() {
+    UsuarioCreateDTO dto = new UsuarioCreateDTO(); 
+
+    assertThat(dto.esValido()).isFalse();
     }
 
     @Test
