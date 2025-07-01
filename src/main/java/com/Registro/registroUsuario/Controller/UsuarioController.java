@@ -1,13 +1,10 @@
 package com.Registro.registroUsuario.Controller;
-
 import com.Registro.registroUsuario.DTO.*;
+import com.Registro.registroUsuario.Hateoas.UsuarioModelAssembler;
 import com.Registro.registroUsuario.Service.UsuarioService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,7 +12,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UsuarioController {
 
-    private final UsuarioService usuarioService;
+      private final UsuarioService usuarioService;
+    private final UsuarioModelAssembler assembler;
 
     @Operation(summary = "Test básico del sistema")
     @GetMapping("/test")
@@ -33,7 +31,7 @@ public class UsuarioController {
     @PostMapping("/crear")
     public EntityModel<UsuarioRegistroDTO> crear(@RequestBody UsuarioCreateDTO dto) {
         UsuarioRegistroDTO usuario = usuarioService.crearUsuario(dto);
-        return agregarLinks(usuario);
+        return assembler.toModel(usuario);
     }
 
     @Operation(summary = "Inicio de sesión de usuario")
@@ -46,37 +44,20 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public EntityModel<UsuarioRegistroDTO> obtener(@PathVariable long id) {
         UsuarioRegistroDTO usuario = usuarioService.obtenerUsuario(id);
-        return agregarLinks(usuario);
+        return assembler.toModel(usuario);
     }
 
     @Operation(summary = "Actualizar datos del usuario")
     @PutMapping("/{id}")
     public EntityModel<UsuarioRegistroDTO> actualizar(@PathVariable long id, @RequestBody UsuarioCreateDTO dto) {
         UsuarioRegistroDTO actualizado = usuarioService.actualizarUsuario(id, dto);
-        return agregarLinks(actualizado);
+        return assembler.toModel(actualizado);
     }
 
     @Operation(summary = "Eliminar usuario")
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable long id) {
+    public Class<?> eliminar(@PathVariable long id) {
         usuarioService.eliminarUsuario(id);
-    }
-
-      private EntityModel<UsuarioRegistroDTO> agregarLinks(UsuarioRegistroDTO dto) {
-        EntityModel<UsuarioRegistroDTO> resource = EntityModel.of(dto);
-
-        resource.add(
-            WebMvcLinkBuilder.linkTo(
-                WebMvcLinkBuilder.methodOn(UsuarioController.class).obtener(dto.getId())
-            ).withSelfRel()
-        );
-
-        resource.add(
-            WebMvcLinkBuilder.linkTo(UsuarioController.class)
-                .slash(dto.getId())
-                .withRel("desactivar")
-        );
-
-        return resource;
+        return null;
     }
 }
