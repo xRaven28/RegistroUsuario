@@ -134,9 +134,10 @@ public class UsuarioControllerTest {
 
    @Test
     void eliminarUsuario_LlamaAlServicio() {
-      controller.eliminar(1L);
-      verify(usuarioService).eliminarUsuario(1L);
-    }
+       var response = controller.eliminar(1L);
+       verify(usuarioService).eliminarUsuario(1L);
+       assertThat(response.getStatusCode().value()).isEqualTo(204);
+}
 
 }
 

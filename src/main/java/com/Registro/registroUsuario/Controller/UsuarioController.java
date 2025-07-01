@@ -5,6 +5,7 @@ import com.Registro.registroUsuario.Service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -53,11 +54,9 @@ public class UsuarioController {
         UsuarioRegistroDTO actualizado = usuarioService.actualizarUsuario(id, dto);
         return assembler.toModel(actualizado);
     }
-
-    @Operation(summary = "Eliminar usuario")
     @DeleteMapping("/{id}")
-    public Class<?> eliminar(@PathVariable long id) {
-        usuarioService.eliminarUsuario(id);
-        return null;
-    }
+    public ResponseEntity<Void> eliminar(@PathVariable long id) {
+       usuarioService.eliminarUsuario(id);
+       return ResponseEntity.noContent().build();
+}
 }
