@@ -1,4 +1,5 @@
 package com.Registro.registroUsuario.Controller;
+
 import com.Registro.registroUsuario.DTO.*;
 import com.Registro.registroUsuario.Hateoas.UsuarioModelAssembler;
 import com.Registro.registroUsuario.Service.UsuarioService;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UsuarioController {
 
-      private final UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
     private final UsuarioModelAssembler assembler;
 
     @Operation(summary = "Test básico del sistema")
@@ -54,9 +55,10 @@ public class UsuarioController {
         UsuarioRegistroDTO actualizado = usuarioService.actualizarUsuario(id, dto);
         return assembler.toModel(actualizado);
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable long id) {
-       usuarioService.eliminarUsuario(id);
-       return ResponseEntity.noContent().build();
-}
+        usuarioService.eliminarUsuario(id);
+        return ResponseEntity.noContent().build();
+    }
 }
